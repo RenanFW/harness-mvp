@@ -2,6 +2,32 @@
 
 harness 1.3.0 — runtime local e portátil (apenas stdlib do Python, sem dependências externas).
 
+## Instalação
+
+Requisito: **Python 3.12+** — o harness usa apenas a biblioteca padrão.
+
+```bash
+git clone https://github.com/RenanFW/harness-mvp.git
+cd harness-mvp
+python app.py          # web shell em http://127.0.0.1:8500
+```
+
+Opcional: instale o **opencode** e rode `opencode` **dentro da raiz do projeto**
+para usar os agentes e o painel web.
+
+## Uso rápido
+
+1. Defina seu modelo/provider em `opencode.json` (o template vem **sem** modelo fixo).
+2. Inicie o opencode na raiz do projeto, selecione o modo **Hub** e digite a tarefa:
+   `faça X` (ou `/hub <tarefa>` como atalho).
+3. O hub consulta a memória, delega exploração -> implementação -> revisão e
+   entrega um contrato de saída com evidências (`APROVADA`,
+   `APROVADA_COM_RESSALVAS` ou `BLOQUEADA`).
+
+Login do web shell: `opencode` / `opencode` na primeira execução (o harness pede
+uma senha personalizada). Detalhes em [Como usar](#como-usar) e
+[CUSTOMIZACAO.md](CUSTOMIZACAO.md).
+
 ## Visão geral
 
 O harness orquestra os agentes do opencode (`hub`, `brain`,
