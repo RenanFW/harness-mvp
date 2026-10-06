@@ -447,11 +447,29 @@ def _main() -> int:
     big = '{"command":"echo x","pad":"' + "a" * (600 * 1024) + '"}'
     req = urllib.request.Request(BASE + "/api/exec", data=big.encode(), headers={
         "Content-Type": "application/json", "Authorization": "Basic " + AUTH})
+    # O servidor rejeita o corpo > 512KB com 413 e PODE fechar o socket antes de
+    # o cliente terminar de enviar os ~600KB (race clássico cliente/servidor).
+    # Quando isso acontece, o cliente recebe BrokenPipeError/ConnectionResetError
+    # (ou um URLError com "broken pipe"/"connection reset") AO ESCREVER o corpo:
+    # é a manifestação da REJEIÇÃO esperada, não da aceitação. Tratamos esses
+    # erros de escrita como o 413 esperado; se o servidor tivesse ACEITO o corpo
+    # grande, o cliente receberia 200/201 (sem exceção) e a asserção falharia.
+    # Nenhuma tolerância a "aceita": o limite de corpo continua sendo exigido.
+    code = None
     try:
         with urllib.request.urlopen(req, timeout=8) as r:
             code = r.status
     except urllib.error.HTTPError as e:
         code = e.code
+    except (BrokenPipeError, ConnectionResetError):
+        # RemoteDisconnected (http.client) é subclasse de ConnectionResetError.
+        code = 413
+    except urllib.error.URLError as e:
+        reason = str(getattr(e, "reason", e)).lower()
+        if "broken pipe" in reason or "connection reset" in reason:
+            code = 413
+        else:
+            raise
     check("corpo > 512KB -> 413", code == 413)
 
     print("== stop job ==")
