@@ -31,3 +31,9 @@ memory/episodic/index.md
 # permanecem versionados como evidência.
 docs/auditorias/**/raw/
 docs/auditorias/**/runs/
+
+# .opencode: arquivos gerados pelo opencode (antes ficavam num .opencode/.gitignore,
+# removido por ser um arquivo rastreado que casava com as próprias regras de ignore).
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock
