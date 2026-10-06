@@ -1,0 +1,17 @@
+# Cache semântico local (gerado sob demanda pelo VectorStore — não versionar)
+data/cache.db
+data/cache.db-*
+data/sandbox/
+
+# Artefatos Python
+__pycache__/
+*.pyc
+
+# Modelos locais opcionais (ONNX, etc.)
+models/
+
+# Segredos (reforço local do .gitignore raiz)
+.env
+.env.*
+*.pem
+*.key

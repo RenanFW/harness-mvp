@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harness — Web Shell</title>
+  <style>
+    :root { --bg:#0d1117; --fg:#c9d1d9; --ok:#3fb950; --err:#f85149; --dim:#8b949e; --accent:#58a6ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 Consolas,Menlo,monospace; }
+    header { display:flex; gap:12px; align-items:center; padding:10px 16px; border-bottom:1px solid #21262d; }
+    header h1 { font-size:14px; margin:0; color:var(--accent); }
+    header span { color:var(--dim); font-size:12px; }
+    main { display:flex; height:calc(100vh - 49px); }
+    #term { flex:1; padding:14px 16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    #term .ok { color:var(--ok); }
+    #term .err { color:var(--err); }
+    #term .dim { color:var(--dim); }
+    aside { width:300px; border-left:1px solid #21262d; display:flex; flex-direction:column; }
+    aside h2 { font-size:12px; margin:0; padding:10px 12px; border-bottom:1px solid #21262d; color:var(--dim); text-transform:uppercase; }
+    #memory { flex:1; overflow:auto; padding:8px 12px; font-size:12px; }
+    #memory details { margin:4px 0; }
+    #memory summary { color:var(--accent); cursor:pointer; }
+    #memory pre { white-space:pre-wrap; word-break:break-word; background:#161b22; padding:8px; border-radius:4px; }
+    .line { display:flex; align-items:center; gap:8px; padding:6px 16px; border-top:1px solid #21262d; background:#0d1117; }
+    .line .prompt { color:var(--ok); }
+    .line input { flex:1; background:transparent; border:none; outline:none; color:var(--fg); font:inherit; }
+    .line input:focus { color:#fff; }
+    .bar { display:flex; gap:8px; padding:6px 12px; border-top:1px solid #21262d; }
+    button { background:#21262d; color:var(--fg); border:1px solid #30363d; border-radius:4px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer; }
+    button:hover { background:#30363d; }
+    button.stop { color:var(--err); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 title="Rotas /api/* exigem HTTP Basic auth (usuário/senha) — informadas via prompt ao abrir">Harness — Web Shell</h1>
+    <span id="status">conectando...</span>
+  </header>
+  <main>
+    <section id="term"></section>
+    <aside>
+      <h2>Memória do Brain</h2>
+      <div id="memory"></div>
+      <div class="bar">
+        <button id="btn-refresh">Atualizar</button>
+        <button id="btn-clear">Limpar tela</button>
+      </div>
+    </aside>
+  </main>
+  <div class="line">
+    <span class="prompt">$</span>
+    <input id="cmd" autofocus autocomplete="off" spellcheck="false" placeholder="digite um comando...">
+    <button class="stop" id="btn-stop">Parar</button>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

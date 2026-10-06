@@ -1,0 +1,33 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "shell": "bash",
+  "instructions": ["AGENTS.md"],
+  "permission": {
+    "edit": {
+      "*": "allow"
+    },
+    "bash": {
+      "git *": "ask",
+      "npm *": "ask",
+      "pip *": "ask",
+      "python *": "ask",
+      "node *": "ask",
+      "rm *": "deny",
+      "rm -rf *": "deny",
+      "git reset --hard *": "deny",
+      "git clean *": "deny",
+      "shutdown *": "deny",
+      "format *": "deny",
+      "*": "ask"
+    },
+    "external_directory": {
+      "*": "deny"
+    },
+    "task": {
+      "*": "ask"
+    },
+    "webfetch": "allow",
+    "websearch": "allow"
+  }
+}
