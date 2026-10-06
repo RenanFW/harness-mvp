@@ -17,6 +17,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -40,6 +41,27 @@ AUTH_PASS = auth.get_password() or config.AUTH_PASSWORD
 AUTH = base64.b64encode(f"{AUTH_USER}:{AUTH_PASS}".encode()).decode()
 PASS = 0
 FAIL = 0
+
+# Saúde determinística para os testes do pipeline: o detector real
+# (`harness/health.py`) depende da memória do ambiente e, em clone limpo
+# (memória resetada), retorna DEGRADADO; a ladder de saúde então escalaria o
+# risco para "alto"/gate_global e o teste de propagação de risco medio falharia
+# (o e2e não estaria isolado do estado ambiente). Fixamos aqui a saúde de um
+# harness em BOOTSTRAP (sem evidência LLM) -> nível efetivo SAUDAVEL, tornando
+# o teste DETERMINÍSTICO. Isto NÃO altera a semântica de segurança do pipeline
+# (check_policy, matriz de risco, HITL, sandbox): apenas o insumo de saúde
+# durante este bloco do teste.
+_SAUDE_BOOTSTRAP = {
+    "score": 1.0,
+    "nivel": "SAUDAVEL",
+    "fatores": {},
+    "fontes": {},
+    "fontes_presentes": 0,
+    "fontes_llm": 0,
+    "bootstrap": True,
+    "indisponivel": False,
+    "metrica": "teste-isolado",
+}
 
 
 def check(name, cond, extra=""):
@@ -283,7 +305,13 @@ def _main() -> int:
     st, res = post("/api/exec", {"command": "rm -rf alguma coisa"})
     check("comando bloqueado (rm -rf)", res["status"] == "blocked")
 
-    st, res = post("/api/exec", {"command": "dir", "cwd": "C:/Windows"})
+    # cwd fora do projeto: usa o DIRETÓRIO PAI do ROOT — sempre absoluto e fora
+    # de `config.ALLOWED_CWD` em qualquer SO. O antigo "C:/Windows" só testa o
+    # bloqueio no Windows; no POSIX ele vira um subdiretório relativo válido
+    # dentro do projeto (não é um caminho externo) e não exercita o guardrail.
+    # O bloqueio real continua sendo exigido aqui.
+    fora = str(pathlib.Path(config.ROOT).resolve().parent)
+    st, res = post("/api/exec", {"command": "echo hi", "cwd": fora})
     check("cwd fora do projeto bloqueado", res["status"] == "blocked")
 
     st, res = post("/api/exec", {"command": "python -c \"import sys; sys.exit(1)\"", "retries": "abc"})
@@ -403,6 +431,11 @@ def _main() -> int:
     _limpa_rate_limit(srv)  # credencial válida não pode herdar 429 residual
     st, res = post("/api/exec", {"command": "echo auth-ok"})
     check("POST exec credencial válida 200", st == 200 and res.get("id"))
+    # Aguarda o job terminar: a gravação assíncrona do histórico não pode correr
+    # com o DELETE abaixo (causava o falso "history limpo" intermitente).
+    if res.get("id"):
+        wait_job(res["id"])
+    time.sleep(0.2)
 
     print("== DELETE history ==")
     st, _ = delete("/api/history")
@@ -443,27 +476,33 @@ def _main() -> int:
     # SEM gerar lixo de memória. O endpoint continua sendo coberto por sua
     # existência; a validação da propagação usa o mesmo contrato da classe.
     from harness.pipeline import AgentPipeline  # noqa: E402
-    # /api/pipeline roda com approve=None -> risco alto deve BLOQUEAR com motivo
-    res = AgentPipeline(approve=None, gravar_registro=False).run_task(_pipeline_task("alto"))
-    check("pipeline risco alto + approve=None -> BLOQUEADA",
-          res.get("status") == "BLOQUEADA"
-          and "risco alto exige aprovação humana" in res.get("resumo", ""))
-    # risco inválido -> BLOQUEADA por contrato
-    res = AgentPipeline(approve=None, gravar_registro=False).run_task(_pipeline_task("critico"))
-    check("pipeline nivel_de_risco inválido -> BLOQUEADA",
-          res.get("status") == "BLOQUEADA"
-          and "nivel_de_risco inválido" in res.get("resumo", ""))
-    # nível chega ao contrato: saida registra risco/politica (medio default)
-    res = AgentPipeline(approve=None, gravar_registro=False).run_task(_pipeline_task("medio"))
-    check("pipeline propaga nivel_de_risco e registra politica",
-          res.get("risco") == "medio"
-          and res.get("politica") == "hitl_por_comando")
-    # retrocompatibilidade: tarefa sem nivel_de_risco vira 'medio'
-    task_sem_risco = _pipeline_task("medio")
-    del task_sem_risco["nivel_de_risco"]
-    res = AgentPipeline(approve=None, gravar_registro=False).run_task(task_sem_risco)
-    check("pipeline sem nivel_de_risco -> medio (retrocompatível)",
-          res.get("risco") == "medio")
+    # Isola o INSUMO de saúde da ladder (mock de `_saude_atual` -> bootstrap
+    # SAUDAVEL) para que a propagação de risco/política não dependa da memória
+    # acumulada do ambiente. O gate de risco em si continua sendo exercitado de
+    # verdade (approve=None, validação de contrato, gate_global).
+    with mock.patch.object(AgentPipeline, "_saude_atual",
+                           return_value=dict(_SAUDE_BOOTSTRAP)):
+        # /api/pipeline roda com approve=None -> risco alto deve BLOQUEAR com motivo
+        res = AgentPipeline(approve=None, gravar_registro=False).run_task(_pipeline_task("alto"))
+        check("pipeline risco alto + approve=None -> BLOQUEADA",
+              res.get("status") == "BLOQUEADA"
+              and "risco alto exige aprovação humana" in res.get("resumo", ""))
+        # risco inválido -> BLOQUEADA por contrato
+        res = AgentPipeline(approve=None, gravar_registro=False).run_task(_pipeline_task("critico"))
+        check("pipeline nivel_de_risco inválido -> BLOQUEADA",
+              res.get("status") == "BLOQUEADA"
+              and "nivel_de_risco inválido" in res.get("resumo", ""))
+        # nível chega ao contrato: saida registra risco/politica (medio default)
+        res = AgentPipeline(approve=None, gravar_registro=False).run_task(_pipeline_task("medio"))
+        check("pipeline propaga nivel_de_risco e registra politica",
+              res.get("risco") == "medio"
+              and res.get("politica") == "hitl_por_comando")
+        # retrocompatibilidade: tarefa sem nivel_de_risco vira 'medio'
+        task_sem_risco = _pipeline_task("medio")
+        del task_sem_risco["nivel_de_risco"]
+        res = AgentPipeline(approve=None, gravar_registro=False).run_task(task_sem_risco)
+        check("pipeline sem nivel_de_risco -> medio (retrocompatível)",
+              res.get("risco") == "medio")
 
     # Update Final (Fase 1): o pipeline deriva grau de complexidade e timeout.
     # Tarefa de consulta simples (sem override) -> baixo/600; sistema completo

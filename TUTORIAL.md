@@ -1,4 +1,4 @@
-# Tutorial do Harness-MVP
+# Tutorial do Harness (template genérico)
 
 ## 1. Iniciar
 

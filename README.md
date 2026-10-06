@@ -1,10 +1,10 @@
-# Harness-MVP — Orquestrador de agentes opencode com memória local e execução controlada
+# Harness — template genérico de orquestração de agentes opencode
 
 harness 1.3.0 — runtime local e portátil (apenas stdlib do Python, sem dependências externas).
 
 ## Visão geral
 
-O Harness-MVP é um harness que orquestra os agentes do opencode (`hub`, `brain`,
+O harness orquestra os agentes do opencode (`hub`, `brain`,
 `explorer`, `implementer`, `reviewer`, `documenter`), aplica o
 delivery-protocol verificável, mantém memória episódica local, controla a
 execução de comandos com guardrails de runtime e aprende com cada execução

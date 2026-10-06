@@ -21,9 +21,10 @@ Nunca armazena segredos, tokens ou dados sensíveis.
 
 - Fatos: `memory/core.md`; auto-modelagem: `memory/self-model.md`; padrões:
   `memory/patterns.md`; referências: `memory/references/`; episódicos:
-  `memory/episodic/` (+ `index.md`); avaliação: `memory/eval/`; sistema de
-  agentes: `memory/agents/` (playbook + resumo.md — orquestrador
-  determinístico, sem LLM).
+  `memory/episodic/` (o `index.md` é gerado em runtime); avaliação:
+  `memory/eval/`; sistema de agentes: `memory/agents/` — no template a pasta
+  começa VAZIA: `playbook.json`/`README.md`/`resumo.md` são GERADOS por
+  `python -m harness.agents compile` (orquestrador determinístico, sem LLM).
 
 ## Confiança e rastreabilidade (Trust)
 

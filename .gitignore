@@ -8,10 +8,10 @@ dist/
 build/
 *.egg-info/
 .harness_history.json
-# B9: `harness-mvp\sidePrjs` era um no-op no git (a barra invertida não separa
-# caminhos; casava com um arquivo literal "harness-mvpsidePrjs"). `sidePrjs/`
-# é a forma correta e efetivamente ignora os projetos gerados em sidePrjs/.
-sidePrjs/
+# `sidePrjs/` guarda os projetos gerados pelo harness. Ignora o CONTEÚDO
+# (projetos), mas versiona o README de convenção da pasta.
+sidePrjs/*
+!sidePrjs/README.md
 # logs/ é 100% runtime: histórico de comandos (logs/harness_history.json) e
 # access log do web shell (logs/server_access.log, F10) não devem ir ao git —
 # o access log vazaria IP/identidade, rota e status HTTP se commitado.
@@ -19,6 +19,9 @@ logs/
 # Senha personalizada (F0/F1): hash scrypt e secrets.env não versionados.
 config/auth.json
 config/secrets.env
+# Índice episódico é (re)gerado em runtime por Memory()._refresh_index(); no
+# template a pasta começa vazia (só .gitkeep) e o índice não é versionado.
+memory/episodic/index.md
 # Relatório de avaliação da memória (Ch19) — versionado como evidência de
 # Evaluation. memory/ NÃO é ignorado, então memory/eval/ é rastreado por padrão
 # (nenhuma negação necessária; a antiga linha `!memory/eval/` era um no-op).

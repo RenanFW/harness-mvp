@@ -37,7 +37,7 @@ referências e obra de *Agentic Design Patterns*, Springer 2026).
 | Nomeador determinístico | `harness/namer.py` | `sidePrjs/<nome>/` único e seguro |
 | RAG consultivo sobre referências | `harness/rag_refs.py` | `consultar(query)` busca/sintetiza `memory/references/`; filtro de trust (alta/media na busca por padrão); síntese determinística alimentada SOMENTE por trust alta (`sintetizavel`), media só consultável; endpoint `GET /api/refs/query` |
 | Avaliação | `harness/eval.py` | critérios declarativos + `default_rules()` |
-| Aprendizado de agentes | `harness/agents.py` | compila `.opencode/agent/*.md` em `memory/agents/playbook.json` + `README.md` + `resumo.md` (~2KB); o Brain lê apenas o `resumo.md` (playbook.json nunca entra no contexto da LLM) |
+| Aprendizado de agentes | `harness/agents.py` | compila `.opencode/agent/*.md` em `memory/agents/playbook.json` + `README.md` + `resumo.md` (~2KB) — GERADOS por `python -m harness.agents compile` (a pasta começa vazia no template); o Brain lê apenas o `resumo.md` (playbook.json nunca entra no contexto da LLM) |
 | Observabilidade do hub | `harness/observability.py` | panorama da EVOLUÇÃO do aprendizado (Item 6): agrega episódicos + histórico de comandos + playbook em `gerar_panorama()` (resumo/distribuições, direto vs. delegado, tempo proxy, re-trabalho com `fonte_curva` playbook/episodios, evolução do playbook, sugestões); endpoint `GET /api/observability`; somente leitura |
 | Agentes opencode | `.opencode/agent/*.md` | hub, brain, explorer, implementer, reviewer, documenter, pentester (fonte de verdade) |
 | Web shell + API | `harness/server.py` | terminal no navegador + endpoints (HTTP Basic auth) |

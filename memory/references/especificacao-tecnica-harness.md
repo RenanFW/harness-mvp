@@ -2,11 +2,11 @@
 id: especificacao-tecnica-harness
 tipo: documento
 titulo: Especificação Técnica — Aprendizado Determinístico e Cache Semântico (Local Harness)
-fonte: harness/motor/docs/especificacao_tecnica_harness.pdf
+fonte: fonte externa (PDF de especificação não versionado neste template)
 data: 2026-08-16
 tags: [especificacao, semantic-cache, embeddings, onnx, hnsw, sandbox, arc, sqlite]
 trust: alta
-origem: harness/motor/docs/especificacao_tecnica_harness.pdf
+origem: fonte externa (PDF de especificação não versionado neste template)
 validado_por: motor
 ---
 

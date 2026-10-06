@@ -2,11 +2,11 @@
 id: resumo-livros-harness-agentes
 tipo: documento
 titulo: Resumo de Referências — Harness para Agentes de IA
-fonte: harness/motor/docs/resumo_livros_harness_agentes.pdf
+fonte: fonte externa (PDF resumo não versionado neste template)
 data: 2026-08-16
 tags: [harness, sandbox, avaliacao, fsm, referencia]
 trust: alta
-origem: harness/motor/docs/resumo_livros_harness_agentes.pdf
+origem: fonte externa (PDF resumo não versionado neste template)
 validado_por: motor
 ---
 

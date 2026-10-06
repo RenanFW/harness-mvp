@@ -55,8 +55,7 @@ validado_por: motor
 ## Pontos de atenção
 - NÃO é livro de Foundations and Trends: é artigo de síntese da CACM,
   acesso aberto no site do autor (PDF legítimo baixado e registrado).
-- PDF local: harness/motor/docs/livros/
-  automated-program-repair-cacm2019.pdf (538 KB).
+- PDF não versionado neste template; baixe pela fonte oficial indicada acima.
 - DOI oficial: 10.1145/3318162. Autores: CMU + Stuttgart + NUS.
 
 ## Fontes e status
